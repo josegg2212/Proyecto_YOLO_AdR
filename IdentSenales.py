@@ -10,7 +10,7 @@ import torchvision.transforms.functional as TF
 
 
 class TrafficSignNet(nn.Module):
-    def __init__(self,num_clas=5,fil=640,col=640):
+    def __init__(self,num_clas=5,fil=128,col=128):
         super().__init__()
         self.num_clas = num_clas
         self.fil = fil
@@ -26,6 +26,7 @@ class TrafficSignNet(nn.Module):
 
         self.dropout = nn.Dropout(0.5)          # Ayuda a evitar sobreajuste
         # self.fc1 = nn.Linear(32 * (self.fil // 4) * (self.col // 4), 256)
+        # self.fc1 = nn.Linear(16 * (self.fil // 2) * (self.col // 2), 256)
         self.fc1 = nn.Linear(64 * (self.fil // 8) * (self.col // 8), 256)                   # [64*fil/4*col/4,1] -> [256,1]
         self.fc2 = nn.Linear(256, self.num_clas)                                            # [256,1] -> [5,1]
 
@@ -39,113 +40,116 @@ class TrafficSignNet(nn.Module):
         x = self.fc2(x)
         return x
 
-imsize=128
 
-# Dataset
-transform_train = transforms.Compose([
-    transforms.Resize((imsize, imsize)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomRotation(degrees=30),
-    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=10),
-    transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.2),
-    transforms.RandomPerspective(distortion_scale=0.4, p=0.5),
-    transforms.RandomCrop(imsize), 
-    transforms.ToTensor(),
-    transforms.RandomErasing(p=0.3, scale=(0.02, 0.2), ratio=(0.3, 3.3)),
-])
-transform_eval = transforms.Compose([
-    transforms.Resize((imsize, imsize)),
-    transforms.ToTensor(),
-])
+if __name__=='__main__':
+    imsize=128
 
-train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/train', transform=transform_train)    # Dataset de entrenamiento (por especificar directorio)
-val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/valid', transform=transform_eval)       # Dataset de validacion (por especificar directorio)
-test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/test', transform=transform_eval)       # Dataset de set (por especificar directorio)
+    # Dataset
+    transform_train = transforms.Compose([
+        transforms.Resize((imsize, imsize)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=30),
+        transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.8, 1.2), shear=10),
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.3),
+        transforms.RandomPerspective(distortion_scale=0.4, p=0.5),
+        transforms.RandomCrop(imsize), 
+        transforms.ToTensor(),
+        transforms.RandomErasing(p=0.4, scale=(0.02, 0.2), ratio=(0.3, 3.3)),
+    ])
+    transform_eval = transforms.Compose([
+        transforms.Resize((imsize, imsize)),
+        transforms.ToTensor(),
+    ])
 
-train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_data, batch_size=32)
-test_loader = DataLoader(test_data, batch_size=32)
+    train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/train', transform=transform_train)    # Dataset de entrenamiento (por especificar directorio)
+    val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/valid', transform=transform_eval)       # Dataset de validacion (por especificar directorio)
+    test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/test', transform=transform_eval)       # Dataset de set (por especificar directorio)
 
-
-# Train
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        # Usa GPU si es posible
-model = TrafficSignNet(num_clas=5,fil=imsize,col=imsize).to(device)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
-
-best_acc = 0.0
-
-for epoch in range(20):
-    model.train()
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
-        
-        # Resetear gradientes acumulados
-        optimizer.zero_grad()
-
-        outputs = model(images)  # Se llama al objeto como si fuera una funcion. El operador __call__() que hereda de nn.Module llama internamente a forward (no recomendado usar directamente model.forward())
-        loss = criterion(outputs, labels)       # Funcion de perdida
-
-        # Backpropagation y actualizacion de pesos de la red
-        loss.backward()
-        optimizer.step()
-
-    print(f"Epoch {epoch+1} complete. Loss: {loss.item():.4f}")
+    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=32)
+    test_loader = DataLoader(test_data, batch_size=32)
 
 
-    # Validation
-    model.eval()
-    correct = 0
-    total = 0
-    with torch.no_grad():                    # Se desactiva el calculo de gradientes durante la validacion
-        for images, labels in val_loader:
+    # Train
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        # Usa GPU si es posible
+    model = TrafficSignNet(num_clas=5,fil=imsize,col=imsize).to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
+
+    best_acc = 0.0
+
+    for epoch in range(20):
+        model.train()
+        for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
         
+            # Resetear gradientes acumulados
+            optimizer.zero_grad()
+
+            outputs = model(images)  # Se llama al objeto como si fuera una funcion. El operador __call__() que hereda de nn.Module llama internamente a forward (no recomendado usar directamente model.forward())
+            loss = criterion(outputs, labels)       # Funcion de perdida
+
+            # Backpropagation y actualizacion de pesos de la red
+            loss.backward()
+            optimizer.step()
+
+        print(f"Epoch {epoch+1} complete. Loss: {loss.item():.4f}")
+
+
+        # Validation
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():                    # Se desactiva el calculo de gradientes durante la validacion
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+        
+                outputs = model(images)
+        
+                _, predicted = torch.max(outputs.data, 1)    # Prediccion de la red
+        
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()    # Numero de predicciones correctas
+
+        accuracy = 100 * correct / total
+        print(f'Accuracy: {100 * correct / total:.2f}%')
+
+        if accuracy >= best_acc:
+            best_acc = accuracy
+            torch.save(model.state_dict(), 'traffic_sign_net.pth')
+            print(f"Modelo guardado con accuracy {accuracy:.2f}%")
+
+
+    print("\nTest del modelo")
+    model.load_state_dict(torch.load('traffic_sign_net.pth'))
+    model.eval()
+
+    class_names = test_data.classes
+    # print(class_names)
+
+    correct = 0
+    total = 0
+    with torch.no_grad():   
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-        
-            _, predicted = torch.max(outputs.data, 1)    # Prediccion de la red
-        
+            _, predicted = torch.max(outputs.data, 1)
+
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()    # Numero de predicciones correctas
+            correct += (predicted == labels).sum().item()
 
-    accuracy = 100 * correct / total
-    print(f'Accuracy: {100 * correct / total:.2f}%')
+            for i in range(images.size(0)):
+                img = images[i].cpu()
+                gt = class_names[labels[i]]
+                pred = class_names[predicted[i]]
 
-    if accuracy >= best_acc:
-        best_acc = accuracy
-        torch.save(model.state_dict(), 'traffic_sign_net.pth')
-        print(f"Modelo guardado con accuracy {accuracy:.2f}%")
+                print(f"GT: {gt:15s} | Pred: {pred:15s}")
 
+                plt.imshow(TF.to_pil_image(img))
+                plt.title(f"GT: {gt} | Pred: {pred}")
+                plt.axis('off')
+                plt.show()
 
-print("\nTest del modelo")
-model.load_state_dict(torch.load('traffic_sign_net.pth'))
-model.eval()
-
-class_names = test_data.classes
-
-correct = 0
-total = 0
-with torch.no_grad():
-    for images, labels in test_loader:
-        images, labels = images.to(device), labels.to(device)
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-        for i in range(images.size(0)):
-            img = images[i].cpu()
-            gt = class_names[labels[i]]
-            pred = class_names[predicted[i]]
-
-            print(f"GT: {gt:15s} | Pred: {pred:15s}")
-
-            plt.imshow(TF.to_pil_image(img))
-            plt.title(f"GT: {gt} | Pred: {pred}")
-            plt.axis('off')
-            plt.show()
-
-test_acc = 100 * correct / total
-print(f'\nTest Accuracy: {test_acc:.2f}%')
+    test_acc = 100 * correct / total
+    print(f'\nTest Accuracy: {test_acc:.2f}%')
