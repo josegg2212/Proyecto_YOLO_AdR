@@ -1,18 +1,10 @@
 import requests
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from IdentSenales import TrafficSignNet
-
-# Cargar imagen
-# img_path = '/ultralytics/yolo_share/Ceda.jpg'
-# img_path = '/ultralytics/yolo_share/Prohibido.jpg'
-# img_path = '/ultralytics/yolo_share/Stop.jpg'
-# img_path = '/ultralytics/yolo_share/Velocidad.jpg'
-img_path = '/ultralytics/yolo_share/Peatones.jpg'
-img = Image.open(img_path).convert('RGB')
 
 #####
 # img_url = 'https://reynober.net/wp-content/uploads/2024/06/marcado-ce-senalizacion-vertical-scaled.jpg'
@@ -23,31 +15,87 @@ img = Image.open(img_path).convert('RGB')
 # response = requests.get(img_url)
 # img = Image.open(BytesIO(response.content)).convert('RGB')
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
+# Cargar imagen
+# img_path = '/ultralytics/yolo_share/Ceda.jpg'
+# img_path = '/ultralytics/yolo_share/Prohibido.jpg'
+# img_path = '/ultralytics/yolo_share/Stop.jpg'
+# img_path = '/ultralytics/yolo_share/Velocidad.jpg'
+# img_path = '/ultralytics/yolo_share/Peatones.jpg'
+# img = Image.open(img_path).convert('RGB')
 
-# Preprocesar
-transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.ToTensor(),
-])
-img_tensor = transform(img).unsqueeze(0).to(device) 
 
-# Cargar modelo
-model = TrafficSignNet().to(device)
-model.load_state_dict(torch.load('/ultralytics/yolo_share/traffic_sign_net.pth'))
-model.eval()
+class sign_classifier():
+    def __init__(self, model_path):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
 
-# Predicción
-with torch.no_grad():
-    output = model(img_tensor)
-    _, predicted = torch.max(output.data, 1)
+        # Preprocesamiento
+        self.transform = transforms.Compose([
+            transforms.Resize((128, 128)),
+            transforms.ToTensor(),
+        ])
 
-class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
-predicted_class = class_names[predicted.item()]
-print(f"Predicción: {predicted_class}")
+        # Cargar modelo
+        self.model = TrafficSignNet().to(self.device)
+        self.model.load_state_dict(torch.load(model_path))
+        self.model.eval()
 
-# Mostrar imagen con predicción
-plt.imshow(img)
-plt.title(f"Predicción: {predicted_class}")
-plt.axis('off')
-plt.show()
+    def process_image(self, img_path):
+        # Cargar imagen
+        img = Image.open(img_path).convert('RGB')
+        img_tensor = self.transform(img).unsqueeze(0).to(self.device)
+
+        # Predicción
+        with torch.no_grad():
+            output = self.model(img_tensor)
+            _, predicted = torch.max(output.data, 1)
+
+        class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
+        predicted_class = class_names[predicted.item()]
+
+        print(f"Predicción: {predicted_class}")
+
+        # Devolver y mostrar imagen con predicción
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 24) 
+        except IOError:
+            font = ImageFont.load_default()
+        
+        text = f"Predicción: {predicted_class}"
+        padding = 10
+
+        # Obtener bounding box del texto
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        # Calcular coordenadas centradas horizontalmente
+        x = (img.width - text_width) // 2
+        y = 20  # Puedes ajustar la altura como prefieras
+
+        # Dibujar fondo blanco detrás del texto
+        draw.rectangle(
+            [x - padding, y - padding, x + text_width + padding, y + text_height + padding],
+            fill="white"
+        )
+
+        # Dibujar texto encima
+        draw.text((x, y), text, fill="blue", font=font)
+
+        plt.imshow(img)
+        plt.title(f"Predicción: {predicted_class}")
+        plt.axis('off')
+        plt.show()
+
+        return img, predicted_class
+    
+
+if __name__ == "__main__":
+    model_path = "traffic_sign_net_5clases.pth"
+    img_path = "/ultralytics/yolo_share/Prohibido.jpg"
+    classifier = sign_classifier(model_path)
+    img, predicted_class = classifier.process_image(img_path)
+
+    # Guardar imagen
+    img.save(f"predicted_{predicted_class}.jpg")
