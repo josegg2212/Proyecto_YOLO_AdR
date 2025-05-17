@@ -3,10 +3,10 @@ import os
 import time 
 
 # Load pretrained model weights for weight transfer
-model = YOLO("/ultralytics/yolo11n.pt")  
+model = YOLO("/ultralytics/yolov8n.pt")  
 
 # Dataset path
-path_dataset = '/ultralytics/datasets/sevici_dataset/data.yaml'
+path_dataset = '/ultralytics/datasets/traffic_sign_dataset/data.yaml'
 
 while True :
     # Check if the path exists

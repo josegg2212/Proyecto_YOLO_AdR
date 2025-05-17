@@ -3,15 +3,15 @@ import numpy as np
 
 
 # Import yolo detector class
-from yolo_detection import YoloDetector
+from yolo_detection_signs import YoloDetector
 
 # Import yolo classifier class
-#from yolo_classification import SignClassifier
-
+from signs_classification import SignClassifier
+# 
 
 # Model weights
 DETECTOR_MODEL_PATH = "/ultralytics/yolo_share/training/first_train_119/weights/best.pt"
-#CLASSIFIER_MODEL_PATH= "sign_classifier_model.pth"
+CLASSIFIER_MODEL_PATH= "traffic_sign_net_5clases.pth"
 
 
 # Class for sign detection and classification
@@ -20,7 +20,7 @@ class SignDetectorClassifier():
 
         # Load YOLO detector and classifier
         self.detector = YoloDetector(DETECTOR_MODEL_PATH)
-        #self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH)
+        self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH)
 
  
     # Process the image file
@@ -30,7 +30,8 @@ class SignDetectorClassifier():
         image = cv2.imread(image_path)
 
         # Detect the sign
-        detected_image , bbox = self.detect_sign(image_path)
+        detected_image , bboxes = self.detect_sign(image_path)
+
         # Save the detected image
         cv2.imwrite("detected_image.jpg", detected_image)
 
@@ -38,14 +39,13 @@ class SignDetectorClassifier():
         cropped_image = self.crop_image(image , bbox)
 
         # Read the cropped image and save it
-        #cv2.imwrite("cropped_image.jpg", cropped_image)
-        #cropped_image_path = "cropped_image.jpg"
+        cv2.imwrite("cropped_image.jpg", cropped_image)
+        cropped_image_path = "cropped_image.jpg"
 
         # Classify the cropped image
-        #processed_image , pred= self.classifier.process_image(cropped_image_path)
+        processed_image , pred= self.classifier.process_image(cropped_image_path)
       
-        #return processed_image , pred
-        return cropped_image 
+        return processed_image , pred
 
     # Sign detection using a YOLO model 
     def detect_sign(self, image_path):
@@ -79,12 +79,10 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier()
 
     # Process the image
-    #processed_image , pred=sign_detector_classifier.process_image("path/to/image.jpg")
-    processed_image=sign_detector_classifier.process_image("sign2.jpeg")
+    processed_image , pred=sign_detector_classifier.process_image("sign2.jpeg")
 
     # Save the processed image
-    #cv2.imwrite(f"processed_image_{pred}.jpg", processed_image)
-    cv2.imwrite(f"processed_image.jpg", processed_image)
+    cv2.imwrite(f"processed_image_{pred}.jpg", processed_image)
 
     # Display the processed image
     cv2.imshow("Processed Image", processed_image)

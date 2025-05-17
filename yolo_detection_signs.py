@@ -18,7 +18,7 @@ class YoloDetector:
         # Get the bounding boxes coordinates
         bboxes = res.boxes.xyxy.cpu().numpy().astype(int)
 
-        return detected_img , bboxes[0]
+        return detected_img , bboxes
 
 
 
