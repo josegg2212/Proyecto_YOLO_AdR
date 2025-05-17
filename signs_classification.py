@@ -24,7 +24,7 @@ from IdentSenales import TrafficSignNet
 # img = Image.open(img_path).convert('RGB')
 
 
-class sign_classifier():
+class SignClassifier():
     def __init__(self, model_path):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
 
@@ -94,7 +94,7 @@ class sign_classifier():
 if __name__ == "__main__":
     model_path = "traffic_sign_net_5clases.pth"
     img_path = "/ultralytics/yolo_share/Prohibido.jpg"
-    classifier = sign_classifier(model_path)
+    classifier = SignClassifier(model_path)
     img, predicted_class = classifier.process_image(img_path)
 
     # Guardar imagen
