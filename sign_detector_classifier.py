@@ -10,8 +10,8 @@ from signs_classification import SignClassifier
 # 
 
 # Model weights
-DETECTOR_MODEL_PATH = "/ultralytics/yolo_share/training/first_train_119/weights/best.pt"
-CLASSIFIER_MODEL_PATH= "traffic_sign_net_5clases.pth"
+DETECTOR_MODEL_PATH = "/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_model.pt"
+CLASSIFIER_MODEL_PATH= "/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_net_5clases.pth"
 
 
 # Class for sign detection and classification
@@ -36,7 +36,7 @@ class SignDetectorClassifier():
         cv2.imwrite("detected_image.jpg", detected_image)
 
         # Crop the image
-        cropped_image = self.crop_image(image , bbox)
+        cropped_image = self.crop_image(image , bboxes[0])
 
         # Read the cropped image and save it
         cv2.imwrite("cropped_image.jpg", cropped_image)
@@ -79,10 +79,10 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier()
 
     # Process the image
-    processed_image , pred=sign_detector_classifier.process_image("sign2.jpeg")
+    processed_image , pred=sign_detector_classifier.process_image("sign1.jpg")
 
-    # Save the processed image
-    cv2.imwrite(f"processed_image_{pred}.jpg", processed_image)
+    # # Save the processed image
+    # cv2.imwrite(f"processed_image_{pred}.jpg", processed_image)
 
     # Display the processed image
     cv2.imshow("Processed Image", processed_image)
