@@ -50,12 +50,17 @@ class SignClassifier():
         # Predicción
         with torch.no_grad():
             output = self.model(img_tensor)
-            _, predicted = torch.max(output.data, 1)
+            probabilities = torch.nn.functional.softmax(output, dim=1)  # Convertir logits a probabilidades
+            confidence, predicted = torch.max(probabilities, 1)  # Obtener la confianza y la clase predicha
 
         class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
         predicted_class = class_names[predicted.item()]
 
-        print(f"Predicción: {predicted_class}")
+        if confidence.item() < 0.1:
+            predicted_class = "Desconocido"
+            print("Confianza baja, no se puede clasificar la señal.")
+
+        print(f"Predicción: {predicted_class} con confianza: {confidence.item():.2f}")
 
         # Dibuja el texto sobre la imagen original
         min_dim = min(img.shape[0], img.shape[1])
