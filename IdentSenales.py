@@ -78,6 +78,7 @@ if __name__=='__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
 
     best_acc = 0.0
+    best_loss = float('inf')
 
     for epoch in range(20):
         model.train()
@@ -117,9 +118,14 @@ if __name__=='__main__':
 
         if accuracy >= best_acc:
             best_acc = accuracy
+            if loss.item() < best_loss:
+                best_loss = loss.item()
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}%")
-
+        elif loss.item() < best_loss and accuracy >= best_acc * 0.9:
+            best_loss = loss.item()
+            torch.save(model.state_dict(), 'traffic_sign_net.pth')
+            print(f"Modelo guardado con accuracy {accuracy:.2f}% y loss {loss.item():.2f}%")
 
     print("\nTest del modelo")
     model.load_state_dict(torch.load('traffic_sign_net.pth'))
