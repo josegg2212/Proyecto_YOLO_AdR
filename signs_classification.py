@@ -63,9 +63,9 @@ class SignClassifier():
         print(f"Predicción: {predicted_class} con confianza: {confidence.item():.2f}")
 
         # Dibuja el texto sobre la imagen original
-        min_dim = min(img.shape[0], img.shape[1])
-        font_scale = max(0.01, min_dim / 500)
-        thickness = max(1, int(min_dim / 150))
+        img = cv2.resize(img, (720, 720))
+        font_scale = 2
+        thickness = 5
 
         text = f"Prediccion: {predicted_class}"
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -73,7 +73,7 @@ class SignClassifier():
 
         (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
         x = (img.shape[1] - text_width) // 2
-        y = 30 if img.shape[0] > 60 else int(text_height + 10)
+        y = 60
 
         cv2.rectangle(
             img,

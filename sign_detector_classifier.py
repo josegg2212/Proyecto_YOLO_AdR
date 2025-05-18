@@ -10,7 +10,7 @@ from signs_classification import SignClassifier
 # 
 
 # Model weights
-DETECTOR_MODEL_PATH = "/ultralytics/yolo_share/training/first_train_119/weights/best.pt"
+DETECTOR_MODEL_PATH = "traffic_sign_model.pt"
 CLASSIFIER_MODEL_PATH= "traffic_sign_net_5clases.pth"
 
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier()
 
     # Process the image and save it
-    sign_detector_classifier.process_image("sign6.jpg")
+    sign_detector_classifier.process_image("../sign5.png")
 
 
 
