@@ -48,13 +48,13 @@ if __name__=='__main__':
     transform_train = transforms.Compose([
         transforms.Resize((imsize, imsize)),
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees=30),
-        transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.8, 1.2), shear=10),
-        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.3),
-        transforms.RandomPerspective(distortion_scale=0.4, p=0.5),
-        transforms.RandomCrop(imsize), 
+        transforms.RandomRotation(degrees=20),
+        transforms.RandomAffine(degrees=0, translate=(0.3, 0.3), scale=(0.8, 1.2), shear=5),
+        transforms.ColorJitter(brightness=0.3, contrast=0.2, saturation=0.2, hue=0.1),
+        transforms.RandomPerspective(distortion_scale=0.2, p=0.2),
+        # transforms.RandomCrop(imsize), 
         transforms.ToTensor(),
-        transforms.RandomErasing(p=0.4, scale=(0.02, 0.2), ratio=(0.3, 3.3)),
+        # transforms.RandomErasing(p=0.2, scale=(0.02, 0.2), ratio=(0.3, 3.3)),
     ])
     transform_eval = transforms.Compose([
         transforms.Resize((imsize, imsize)),
@@ -80,7 +80,7 @@ if __name__=='__main__':
     best_acc = 0.0
     best_loss = float('inf')
 
-    for epoch in range(20):
+    for epoch in range(50):
         model.train()
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
@@ -116,13 +116,13 @@ if __name__=='__main__':
         accuracy = 100 * correct / total
         print(f'Accuracy: {100 * correct / total:.2f}%')
 
-        if accuracy >= best_acc:
+        if accuracy > best_acc:
             best_acc = accuracy
             if loss.item() < best_loss:
                 best_loss = loss.item()
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}%")
-        elif loss.item() < best_loss and accuracy >= best_acc * 0.9:
+        elif loss.item() < best_loss and accuracy >= best_acc * 0.98:
             best_loss = loss.item()
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}% y loss {loss.item():.2f}%")
