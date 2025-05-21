@@ -23,11 +23,15 @@ class TrafficSignNet(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)                                  # [32,fil/2,col/2] -> [32,fil/4,col/4]
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)   # [32,fil/4,col/4] -> [64,fil/4,col/4]
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)                                  # [64,fil/4,col/4] -> [64,fil/8,col/8]
+        # self.conv4 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)  # [64,fil/8,col/8] -> [128,fil/8,col/8]
+        # self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)                                  # [128,fil/8,col/8] -> [128,fil/16,col/16]
 
-        self.dropout = nn.Dropout(0.5)          # Ayuda a evitar sobreajuste
+        self.dropout = nn.Dropout(0.25)          # Ayuda a evitar sobreajuste
         # self.fc1 = nn.Linear(32 * (self.fil // 4) * (self.col // 4), 256)
         # self.fc1 = nn.Linear(16 * (self.fil // 2) * (self.col // 2), 256)
         self.fc1 = nn.Linear(64 * (self.fil // 8) * (self.col // 8), 256)                   # [64*fil/4*col/4,1] -> [256,1]
+        # self.fc1 = nn.Linear(128 * (self.fil // 16) * (self.col // 16), 1024)               # [128*fil/16*col/16,1] -> [1024,1]  ###
+        # self.fc1p5 = nn.Linear(1024, 256)                                                   # [1024,1] -> [256,1]  ###
         self.fc2 = nn.Linear(256, self.num_clas)                                            # [256,1] -> [5,1]
 
 
@@ -35,8 +39,10 @@ class TrafficSignNet(nn.Module):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x))) 
         x = self.pool3(F.relu(self.conv3(x)))
+        # x = self.pool4(F.relu(self.conv4(x)))   ###
         x = x.view(x.size(0),-1)                # Equivalente a Flatten en tensorflow
         x = self.dropout(F.relu(self.fc1(x)))   
+        # x = self.dropout(F.relu(self.fc1p5(x))) ###
         x = self.fc2(x)
         return x
 
@@ -61,9 +67,13 @@ if __name__=='__main__':
         transforms.ToTensor(),
     ])
 
-    train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/train', transform=transform_train)    # Dataset de entrenamiento (por especificar directorio)
-    val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/valid', transform=transform_eval)       # Dataset de validacion (por especificar directorio)
-    test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/test', transform=transform_eval)       # Dataset de set (por especificar directorio)
+    # train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/train', transform=transform_train)    # Dataset de entrenamiento
+    # val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/valid', transform=transform_eval)       # Dataset de validacion
+    # test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/test', transform=transform_eval)       # Dataset de test
+
+    train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/train', transform=transform_train)    # Dataset de entrenamiento
+    val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/valid', transform=transform_eval)       # Dataset de validacion
+    test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/test', transform=transform_eval)       # Dataset de test
 
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
@@ -72,7 +82,8 @@ if __name__=='__main__':
 
     # Train
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        # Usa GPU si es posible
-    model = TrafficSignNet(num_clas=5,fil=imsize,col=imsize).to(device)
+    # model = TrafficSignNet(num_clas=5,fil=imsize,col=imsize).to(device)
+    model = TrafficSignNet(num_clas=9,fil=imsize,col=imsize).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
@@ -122,7 +133,7 @@ if __name__=='__main__':
                 best_loss = loss.item()
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}%")
-        elif loss.item() < best_loss and accuracy >= best_acc * 0.98:
+        elif loss.item() < best_loss and accuracy >= best_acc * 0.96:
             best_loss = loss.item()
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}% y loss {loss.item():.2f}%")

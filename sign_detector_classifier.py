@@ -11,7 +11,9 @@ from signs_classification import SignClassifier
 
 # Model weights
 DETECTOR_MODEL_PATH = "traffic_sign_model.pt"
-CLASSIFIER_MODEL_PATH= "traffic_sign_net_5clases_5.pth"
+CLASSIFIER_MODEL_PATH= "traffic_sign_net_9clases_3.pth"
+
+num_classes = 9
 
 
 # Class for sign detection and classification
@@ -20,7 +22,7 @@ class SignDetectorClassifier():
 
         # Load YOLO detector and classifier
         self.detector = YoloDetector(DETECTOR_MODEL_PATH)
-        self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH)
+        self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH, num_clas=num_classes)
 
  
     # Process the image file
