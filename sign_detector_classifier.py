@@ -11,9 +11,9 @@ from signs_classification import SignClassifier
 
 # Model weights
 DETECTOR_MODEL_PATH = "traffic_sign_model.pt"
-CLASSIFIER_MODEL_PATH= "traffic_sign_net_9clases_3.pth"
+CLASSIFIER_MODEL_PATH= "traffic_sign_net_8clases.pth"
 
-num_classes = 9
+num_classes = 8
 
 
 # Class for sign detection and classification
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier()
 
     # Process the image and save it
-    sign_detector_classifier.process_image("../sign6.jpg")
+    sign_detector_classifier.process_image("../sign3.png")
 
 
 

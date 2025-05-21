@@ -49,6 +49,7 @@ class TrafficSignNet(nn.Module):
 
 if __name__=='__main__':
     imsize=128
+    num_classes = 8
 
     # Dataset
     transform_train = transforms.Compose([
@@ -71,9 +72,9 @@ if __name__=='__main__':
     # val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/valid', transform=transform_eval)       # Dataset de validacion
     # test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals/test', transform=transform_eval)       # Dataset de test
 
-    train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/train', transform=transform_train)    # Dataset de entrenamiento
-    val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/valid', transform=transform_eval)       # Dataset de validacion
-    test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals2/test', transform=transform_eval)       # Dataset de test
+    train_data = datasets.ImageFolder('/ultralytics/yolo_share/signals3/train', transform=transform_train)    # Dataset de entrenamiento
+    val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals3/valid', transform=transform_eval)       # Dataset de validacion
+    test_data = datasets.ImageFolder('/ultralytics/yolo_share/signals3/test', transform=transform_eval)       # Dataset de test
 
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
@@ -83,7 +84,7 @@ if __name__=='__main__':
     # Train
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        # Usa GPU si es posible
     # model = TrafficSignNet(num_clas=5,fil=imsize,col=imsize).to(device)
-    model = TrafficSignNet(num_clas=9,fil=imsize,col=imsize).to(device)
+    model = TrafficSignNet(num_clas=num_classes,fil=imsize,col=imsize).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
@@ -143,7 +144,7 @@ if __name__=='__main__':
     model.eval()
 
     class_names = test_data.classes
-    # print(class_names)
+    print(class_names)
 
     correct = 0
     total = 0

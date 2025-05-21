@@ -56,6 +56,8 @@ class SignClassifier():
 
         if self.num_clas == 5:
             class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
+        elif self.num_clas == 8:
+            class_names = ['CEDA', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
         elif self.num_clas == 9:
             class_names = ['CEDA', 'DESCONOCIDO', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
         predicted_class = class_names[predicted.item()]
