@@ -6,7 +6,7 @@ import time
 model = YOLO("/ultralytics/yolov8n.pt")  
 
 # Dataset path
-path_dataset = '/ultralytics/datasets/traffic_sign_dataset/data.yaml'
+path_dataset = '/ultralytics/datasets/sevici_dataset/data.yaml'
 
 while True :
     # Check if the path exists
@@ -15,7 +15,7 @@ while True :
         print("Iniciando entrenamiento...")
         
         # Train the model
-        results = model.train(data=path_dataset, epochs=100, imgsz=640, workers=0, batch=8, project="/ultralytics/yolo_share/training", name="first_train_11")
+        results = model.train(data=path_dataset, epochs=100, imgsz=640, workers=0, batch=4, project="/ultralytics/yolo_share/training", name="first_train_11")
 
         break
     else : 

@@ -27,12 +27,11 @@ import time
 
 
 class SignClassifier():
-    def __init__(self, model_path, num_clas=5, fil=128, col=128):
+    def __init__(self, model_path):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
-        self.num_clas = num_clas
 
         # Cargar modelo
-        self.model = TrafficSignNet(num_clas=num_clas, fil=fil, col=col).to(self.device)
+        self.model = TrafficSignNet().to(self.device)
         self.model.load_state_dict(torch.load(model_path))
         self.model.eval()
 
@@ -54,12 +53,7 @@ class SignClassifier():
             probabilities = torch.nn.functional.softmax(output, dim=1)  # Convertir logits a probabilidades
             confidence, predicted = torch.max(probabilities, 1)  # Obtener la confianza y la clase predicha
 
-        if self.num_clas == 5:
-            class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
-        elif self.num_clas == 8:
-            class_names = ['CEDA', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
-        elif self.num_clas == 9:
-            class_names = ['CEDA', 'DESCONOCIDO', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
+        class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
         predicted_class = class_names[predicted.item()]
 
         if confidence.item() < 0.1:
@@ -69,9 +63,9 @@ class SignClassifier():
         print(f"Predicción: {predicted_class} con confianza: {confidence.item():.2f}")
 
         # Dibuja el texto sobre la imagen original
-        img = cv2.resize(img, (720, 720))
-        font_scale = 2
-        thickness = 5
+        min_dim = min(img.shape[0], img.shape[1])
+        font_scale = max(0.01, min_dim / 500)
+        thickness = max(1, int(min_dim / 150))
 
         text = f"Prediccion: {predicted_class}"
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -79,7 +73,7 @@ class SignClassifier():
 
         (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
         x = (img.shape[1] - text_width) // 2
-        y = 60
+        y = 30 if img.shape[0] > 60 else int(text_height + 10)
 
         cv2.rectangle(
             img,
