@@ -3,15 +3,17 @@ import numpy as np
 
 
 # Import yolo detector class
-from yolo_sign_detection import YoloDetector
+from yolo_detection_signs import YoloDetector
 
 # Import yolo classifier class
 from signs_classification import SignClassifier
 # 
 
 # Model weights
-DETECTOR_MODEL_PATH = "/ultralytics/yolo_share/training/first_train_119/weights/best.pt"
-CLASSIFIER_MODEL_PATH= "traffic_sign_net_5clases.pth"
+DETECTOR_MODEL_PATH = "traffic_sign_model.pt"
+CLASSIFIER_MODEL_PATH= "traffic_sign_net_8clases.pth"
+
+num_classes = 8
 
 
 # Class for sign detection and classification
@@ -20,7 +22,7 @@ class SignDetectorClassifier():
 
         # Load YOLO detector and classifier
         self.detector = YoloDetector(DETECTOR_MODEL_PATH)
-        self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH)
+        self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH, num_clas=num_classes)
 
  
     # Process the image file
@@ -89,7 +91,7 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier()
 
     # Process the image and save it
-    sign_detector_classifier.process_image("sign6.jpg")
+    sign_detector_classifier.process_image("../sign3.png")
 
 
 
