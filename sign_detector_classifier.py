@@ -1,22 +1,16 @@
 import cv2
-
-# Import yolo detector class
-from yolo_detection_signs import YoloDetector
-
-# Import yolo classifier class
-from signs_classification import SignClassifier
+from yolo_detection_signs import YoloDetector       # Import yolo detector class
+from signs_classification import SignClassifier     # Import yolo classifier class
 
 
 # Model weights
 DETECTOR_MODEL_PATH = "traffic_sign_model.pt"
-CLASSIFIER_MODEL_PATH= "traffic_sign_net_8clases.pth"
-
-num_classes = 8
+CLASSIFIER_MODEL_PATH = "traffic_sign_net_8clases.pth"
 
 
 # Class for sign detection and classification
 class SignDetectorClassifier():
-    def __init__(self):
+    def __init__(self, num_classes = 8):
         # Load YOLO detector and classifier
         self.detector = YoloDetector(DETECTOR_MODEL_PATH)
         self.classifier = SignClassifier(CLASSIFIER_MODEL_PATH, num_clas=num_classes)
@@ -44,7 +38,7 @@ class SignDetectorClassifier():
             cv2.imwrite(cropped_image_path, cropped_image)
 
             # Classify the cropped image
-            processed_image , pred= self.classifier.process_image(cropped_image_path)
+            processed_image, pred= self.classifier.process_image(cropped_image_path)
 
             # Save the processed image
             cv2.imwrite(f"processed_image_{pred}_{i}.jpg", processed_image)
@@ -85,7 +79,8 @@ class SignDetectorClassifier():
 
 
 if __name__ == "__main__":
-    sign_detector_classifier = SignDetectorClassifier()
+    num_classes = 8
+    sign_detector_classifier = SignDetectorClassifier(num_classes=num_classes)
 
     # Process the image and save it
     sign_detector_classifier.process_image("../sign3.png")
