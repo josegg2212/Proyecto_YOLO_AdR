@@ -3,7 +3,6 @@ import numpy as np
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-import torchvision.transforms.functional as TF
 from IdentSenales import TrafficSignNet
 
 
@@ -18,12 +17,11 @@ class_names = ['CEDA', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN 
 val_data = datasets.ImageFolder('/ultralytics/yolo_share/signals3/valid', transform=transform_eval)
 val_loader = DataLoader(val_data, batch_size=32)
 
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = TrafficSignNet(num_clas=num_clas,fil=imsize,col=imsize).to(device)
 model.load_state_dict(torch.load('/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_net_8clases.pth', map_location=device))
 
-# Confusion Matrix por clase
+# Confussion Matrix per class
 ConfMat = torch.zeros(num_clas, num_clas, dtype=torch.float32).to(device)
 
 model.eval()
@@ -39,13 +37,13 @@ with torch.no_grad():
             ConfMat[t.long(), p.long()] += 1
 
 
-# Normalizar la matriz de confusión
+# Confusion matrix normalization
 ConfMat = ConfMat / ConfMat.sum(dim=1, keepdim=True)
 
-# Convertir a numpy para visualización
+# Convert to numpy for visualization
 ConfMat = ConfMat.cpu().numpy()
 
-# Visualizar la matriz de confusión
+# Visualization of the confusion matrix
 plt.figure(figsize=(10, 8))
 plt.imshow(ConfMat, interpolation='nearest', cmap=plt.cm.Blues)
 plt.title('Matriz de Confusión Normalizada')
@@ -53,8 +51,8 @@ plt.colorbar()
 plt.xticks(np.arange(num_clas), val_data.classes, rotation=45)
 plt.yticks(np.arange(num_clas), val_data.classes)
 plt.xlabel('Predicción')
-plt.ylabel('Etiqueta Verdadera')
-# Valores numéricos matriz
+plt.ylabel('Ground Truth')
+# Numerical values in the confusion matrix
 for i in range(num_clas):
     for j in range(num_clas):
         value = ConfMat[i, j]
@@ -62,10 +60,7 @@ for i in range(num_clas):
 plt.tight_layout()
 plt.show()
 
-# # Guardar la matriz de confusión como imagen
-# plt.savefig('/ultralytics/yolo_share/confusion_matrix.png', bbox_inches='tight')
-
-# Numero de true positives, false positives y false negatives por cada clase
+# Amount of True Positives, False Positives and False Negatives per class
 tp = {}
 fp = {}
 fn = {}
