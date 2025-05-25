@@ -10,14 +10,24 @@ class SignDetectorClassifier():
         self.detector = YoloDetector(detector_path)
         self.classifier = SignClassifier(classifier_path, num_clas = num_classes)
 
- 
+
+    # Crop the sign
+    def crop_image(self, image, bbox):
+        # Crop the image using bounding box
+        x1, y1, x2, y2 = bbox
+
+        cropped_image = image[y1:y2, x1:x2]
+
+        return cropped_image
+    
+
     # Process the image file
     def process_image(self, image_path):
         # Read the image
         image = cv2.imread(image_path)
 
         # Detect the sign
-        detected_image , bboxes = self.detect_sign(image_path)
+        detected_image, bboxes = self.detector.process_image(image_path)
 
         # Save the detected image
         cv2.imwrite("detected_image.jpg", detected_image)
@@ -44,33 +54,6 @@ class SignDetectorClassifier():
             cv2.destroyAllWindows()
 
             i += 1
-
-
-    # Sign detection using a YOLO model 
-    def detect_sign(self, image_path):
-        # Detect the sign
-        detected_image, bbox = self.detector.process_image(image_path)
-
-        return detected_image, bbox
-
-
-    # Crop the sign
-    def crop_image(self, image, bbox):
-        # Crop the image using bounding box
-        x1, y1, x2, y2 = bbox
-
-        cropped_image = image[y1:y2, x1:x2]
-
-        return cropped_image
-
-
-    # Sign classification using a YOLO model 
-    def classify_sign(self, cropped_image_path):
-        # Classify the sign
-        classified_image = self.classifier.process_image(cropped_image_path)
-
-        return classified_image
-
 
 
 if __name__ == "__main__":
