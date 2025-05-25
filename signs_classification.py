@@ -32,18 +32,9 @@ class SignClassifier():
             probabilities = torch.nn.functional.softmax(output, dim=1)  # Convert logits to probabilities
             confidence, predicted = torch.max(probabilities, 1)         # Get confidence and predicted class
 
-        if self.num_clas == 5:
-            class_names = ['CEDA', 'PEATONES', 'PROHIBIDO', 'STOP', 'VELOCIDAD']
-        elif self.num_clas == 8:
-            class_names = ['CEDA', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
-        elif self.num_clas == 9:
-            class_names = ['CEDA', 'DESCONOCIDO', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
+        class_names = ['CEDA', 'NO ADELANTAR', 'PEATONES', 'PROHIBIDO', 'ROTONDA', 'SIN SALIDA', 'STOP', 'VELOCIDAD']
+        
         predicted_class = class_names[predicted.item()]
-
-        if confidence.item() < 0.1:
-            predicted_class = "Desconocido"
-            print("Confianza baja, no se puede clasificar la señal.")
-
         print(f"Predicción: {predicted_class} con confianza: {confidence.item():.2f}")
 
         # Draws the text on the original image
