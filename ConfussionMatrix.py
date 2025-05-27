@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import time
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from IdentSenales import TrafficSignNet
@@ -25,6 +26,7 @@ model.load_state_dict(torch.load('/ultralytics/yolo_share/Proyecto_YOLO_AdR/traf
 ConfMat = torch.zeros(num_clas, num_clas, dtype=torch.float32).to(device)
 
 model.eval()
+T_ini=time.time()
 with torch.no_grad():
     for images, labels in val_loader:
         images, labels = images.to(device), labels.to(device)
@@ -36,6 +38,9 @@ with torch.no_grad():
         for t, p in zip(labels.view(-1), predicted.view(-1)):
             ConfMat[t.long(), p.long()] += 1
 
+T_fin=time.time()
+print(f"Total de imágenes procesadas: {len(val_data)}")
+print(f"Tiempo de inferencia medio: {(T_fin - T_ini)/len(val_data)} segundos por imagen")
 
 # Confusion matrix normalization
 ConfMat = ConfMat / ConfMat.sum(dim=1, keepdim=True)
