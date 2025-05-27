@@ -1,6 +1,6 @@
 import torch
 from torchvision import transforms
-from IdentSenales import TrafficSignNet
+from SignalNet import TrafficSignNet
 import cv2
 
 

@@ -4,7 +4,7 @@ import torch
 import time
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from IdentSenales import TrafficSignNet
+from SignalNet import TrafficSignNet
 
 
 imsize=128
