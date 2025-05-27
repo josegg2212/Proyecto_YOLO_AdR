@@ -61,7 +61,7 @@ plt.ylabel('Ground Truth')
 for i in range(num_clas):
     for j in range(num_clas):
         value = ConfMat[i, j]
-        plt.text(j, i, str(value), ha="center", va="center", color="black")
+        plt.text(j, i, str(value), ha="center", va="center", color="black" if value < 0.5 else "white", fontsize=16)
 plt.tight_layout()
 plt.show()
 
