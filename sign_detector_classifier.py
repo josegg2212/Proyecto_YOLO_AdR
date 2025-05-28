@@ -65,4 +65,4 @@ if __name__ == "__main__":
     sign_detector_classifier = SignDetectorClassifier(num_classes = num_classes, detector_path = DETECTOR_MODEL_PATH, classifier_path = CLASSIFIER_MODEL_PATH)
 
     # Process the image and save it
-    sign_detector_classifier.process_image("../sign3.png")
+    sign_detector_classifier.process_image("sign_test.png")
