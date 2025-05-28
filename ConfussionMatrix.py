@@ -20,7 +20,8 @@ val_loader = DataLoader(val_data, batch_size=32)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = TrafficSignNet(num_clas=num_clas,fil=imsize,col=imsize).to(device)
-model.load_state_dict(torch.load('/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_net_8clases.pth', map_location=device))
+# model.load_state_dict(torch.load('/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_net_8clases.pth', map_location=device))
+model.load_state_dict(torch.load('/ultralytics/yolo_share/Proyecto_YOLO_AdR/traffic_sign_net.pth', map_location=device))
 
 # Confussion Matrix per class
 ConfMat = torch.zeros(num_clas, num_clas, dtype=torch.float32).to(device)

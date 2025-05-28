@@ -77,10 +77,13 @@ if __name__=='__main__':
 
     best_acc = 0.0
     best_loss = float('inf')
+    acc_table = []      # To store accuracy for each epoch
 
     # Training loop
     for epoch in range(50):
         model.train()
+        total_loss = 0.0
+        num_batches = 0
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
 
@@ -93,8 +96,13 @@ if __name__=='__main__':
             # Backpropagation and weight update
             loss.backward()
             optimizer.step()
+            
+            total_loss += loss.item()
+            num_batches += 1
 
-        print(f"Epoch {epoch+1} complete. Loss: {loss.item():.4f}")
+        # Average loss for the epoch
+        mean_loss = total_loss / num_batches
+        print(f"Epoch {epoch+1} complete. Loss: {mean_loss:.4f}")
 
 
         # Validation
@@ -114,18 +122,32 @@ if __name__=='__main__':
 
         accuracy = 100 * correct / total
         print(f'Accuracy: {100 * correct / total:.2f}%')
+        acc_table.append(accuracy)
 
         # Model save criteria
         if accuracy > best_acc:
             best_acc = accuracy
-            if loss.item() < best_loss:
-                best_loss = loss.item()
+            if mean_loss < best_loss:
+                best_loss = mean_loss
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
             print(f"Modelo guardado con accuracy {accuracy:.2f}%")
-        elif loss.item() < best_loss and accuracy >= best_acc * 0.96:
-            best_loss = loss.item()
+        elif mean_loss < best_loss and accuracy >= best_acc * 0.96:
+            best_loss = mean_loss
             torch.save(model.state_dict(), 'traffic_sign_net.pth')
-            print(f"Modelo guardado con accuracy {accuracy:.2f}% y loss {loss.item():.2f}%")
+            print(f"Modelo guardado con accuracy {accuracy:.2f}% y loss {mean_loss:.3f}")
+
+
+    # Plot accuracy over epochs
+    acc_table = [0] + acc_table
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(len(acc_table)), acc_table, linestyle='-', color='b')
+    plt.title('Evolución Accuracy')
+    plt.xlabel('Épocas')
+    plt.ylabel('Accuracy (%)')
+    plt.xticks(range(0, len(acc_table), max(1, len(acc_table)//10)))
+    plt.grid()
+    plt.show()
+
 
     # Model testing
     print("\nTest del modelo")
